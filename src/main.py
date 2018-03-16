@@ -1,5 +1,31 @@
-import numpy as np
+from knn import *
+import time
+import os
+
+TRAIN_WALDO_CSV_64_RGB = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/64/trainWaldos_64.csv'
+TEST_WALDO_CSV_64_RGB = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/64/testWaldos_64.csv'
+
+CROSS_VALIDATION_SIZE = 4
 
 
 if __name__ == '__main__':
-    print('toto')
+    # Uncomment below line to see full arrays on print
+    # np.set_printoptions(threshold=np.nan)
+
+    trainWaldos = read_csv(TRAIN_WALDO_CSV_64_RGB).values
+    testWaldos = read_csv(TEST_WALDO_CSV_64_RGB).values
+
+    data_train, label_train = organize_data(trainWaldos)
+    data_test, label_test = organize_data(testWaldos)
+
+    # Basic usage of KNN algorithm
+    print('KNN algorithm:')
+    start = time.time()
+    knn_algorithm(data_train, label_train, data_test, label_test)
+    timer(start, time.time())
+
+    # Cross validation example on KNN algorithm
+    print('KNN algorithm cross validation example:')
+    start = time.time()
+    knn_cross_validation(data_train, label_train, 4)
+    timer(start, time.time())

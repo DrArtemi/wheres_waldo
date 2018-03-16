@@ -7,10 +7,9 @@ name = "pypi"
 
 [packages]
 
-requests = "*"
 matplotlib = "*"
-numpy = "*"
 pillow = "*"
+numpy = "*"
 pandas = "*"
 
 

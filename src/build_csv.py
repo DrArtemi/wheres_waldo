@@ -8,18 +8,20 @@ WALDO_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/'
 
 
 def get_images_data(dir):
-    return np.array([np.array(imread(WALDO_DIR + dir + '/waldo/' + fname)) for fname in os.listdir(WALDO_DIR + dir + '/waldo')]),\
-            np.array([np.array(imread(WALDO_DIR + dir + '/notwaldo/' + fname)) for fname in os.listdir(WALDO_DIR + dir + '/notwaldo')])
+    return np.array([np.array(imread(WALDO_DIR + dir + '/waldo/' + fname))
+                     for fname in os.listdir(WALDO_DIR + dir + '/waldo')]),\
+            np.array([np.array(imread(WALDO_DIR + dir + '/notwaldo/' + fname))
+                      for fname in os.listdir(WALDO_DIR + dir + '/notwaldo')])
 
 
-def build_dataframe(dataArray, label, labelValue):
+def build_dataframe(data_array, label, label_value):
     data = []
 
-    for img in dataArray:
+    for img in data_array:
         data.append(img.flatten('F'))
 
     df = pd.DataFrame(data)
-    df[label] = labelValue
+    df[label] = label_value
 
     return df
 
@@ -29,8 +31,15 @@ def build_data(waldos, notwaldos, dir):
     df2 = build_dataframe(notwaldos, 'waldo', 0)
 
     frames = [df1, df2]
-    allWaldos = pd.concat(frames)
-    allWaldos.to_csv(WALDO_DIR + dir + '/allWaldos_' + dir + '.csv', index=False)
+    all_waldos = pd.concat(frames)
+    all_waldos = all_waldos.sample(frac=1).reset_index(drop=True)
+    test_waldos = all_waldos.sample(n=round(len(all_waldos) / 5))
+    train_waldos = all_waldos.drop(test_waldos.index)
+
+    print("Building train data CSV...")
+    train_waldos.to_csv(WALDO_DIR + dir + '/trainWaldos_' + dir + '.csv', index=False)
+    print("Building test data CSV...")
+    test_waldos.to_csv(WALDO_DIR + dir + '/testWaldos_' + dir + '.csv', index=False)
 
 
 if __name__ == '__main__':
