@@ -11,6 +11,10 @@ matplotlib = "*"
 pillow = "*"
 numpy = "*"
 pandas = "*"
+sklearn = "*"
+scipy = "*"
+tensorflow = "*"
+keras = "*"
 
 
 [dev-packages]

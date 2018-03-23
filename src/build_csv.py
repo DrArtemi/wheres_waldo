@@ -1,3 +1,4 @@
+from sklearn.model_selection import train_test_split
 from matplotlib.pyplot import imread
 import numpy as np
 import pandas as pd
@@ -32,9 +33,8 @@ def build_data(waldos, notwaldos, dir):
 
     frames = [df1, df2]
     all_waldos = pd.concat(frames)
-    all_waldos = all_waldos.sample(frac=1).reset_index(drop=True)
-    test_waldos = all_waldos.sample(n=round(len(all_waldos) / 5))
-    train_waldos = all_waldos.drop(test_waldos.index)
+
+    train_waldos, test_waldos = train_test_split(all_waldos, test_size=0.20, random_state=42)
 
     print("Building train data CSV...")
     train_waldos.to_csv(WALDO_DIR + dir + '/trainWaldos_' + dir + '.csv', index=False)
@@ -43,6 +43,7 @@ def build_data(waldos, notwaldos, dir):
 
 
 if __name__ == '__main__':
+    np.set_printoptions(threshold=np.nan)
     if len(sys.argv) > 1:
         waldos, notWaldos = get_images_data(sys.argv[1])
         build_data(waldos, notWaldos, sys.argv[1])
