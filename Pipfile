@@ -15,6 +15,7 @@ sklearn = "*"
 scipy = "*"
 tensorflow = "*"
 keras = "*"
+"h5py" = "*"
 
 
 [dev-packages]
