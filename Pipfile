@@ -16,6 +16,7 @@ scipy = "*"
 tensorflow = "*"
 keras = "*"
 "h5py" = "*"
+opencv-python = "*"
 
 
 [dev-packages]

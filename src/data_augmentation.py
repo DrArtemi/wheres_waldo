@@ -1,12 +1,14 @@
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-from matplotlib.pyplot import imread
+from matplotlib.pyplot import imread, imshow, show, savefig
 import numpy as np
 import sys
 import os
+import cv2
 
 WALDO_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/'
 WALDO_DUPLICATION_NB = 100
 NOTWALDO_DUPLICATION_NB = 2
+NOISE_DUPLICATION = 30
 
 
 def get_images_data(dir):
@@ -48,9 +50,28 @@ def data_augmentation(waldos, notWaldos, dir):
                 break
 
 
+def get_waldos_data(path):
+    waldos = []
+    for fname in os.listdir(path + '/'):
+        waldos.append(cv2.imread(path + '/' + fname))
+    return np.array(waldos)
+
+
+def data_add_noise(waldos, path):
+    for idx, waldo in enumerate(waldos):
+        for i in range(40):
+            noise = (0.4 * np.random.randn(*waldo.shape)) * 10
+            img = waldo + noise
+            cv2.imwrite(path + '/noisy_' + str(idx) + '_' + str(i) + '.jpg', img)
+
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        waldos, notWaldos = get_images_data(sys.argv[1])
-        data_augmentation(waldos, notWaldos, sys.argv[1])
+    if len(sys.argv) > 2:
+        if sys.argv[1] == 'aug':
+            waldos, notWaldos = get_images_data(sys.argv[2])
+            data_augmentation(waldos, notWaldos, sys.argv[2])
+        elif sys.argv[1] == 'noise':
+            waldos = get_waldos_data(sys.argv[2])
+            data_add_noise(waldos, sys.argv[2])
     else:
-        print('Usage: build_csv.py [image directory]')
+        print('Usage: data_augmentation.py [aug or noise] [image directory]')

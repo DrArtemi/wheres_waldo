@@ -7,6 +7,18 @@ import shutil
 import os
 
 
+def count_classes(labels):
+    cnt_nwaldo = 0
+    cnt_waldo = 0
+    for i in range(labels.shape[0]):
+        if labels[i] == 0:
+            cnt_nwaldo += 1
+        if labels[i] == 1:
+            cnt_waldo += 1
+
+    return cnt_nwaldo, cnt_waldo
+
+
 def organize_data(data_array):
     return data_array[:, :-1], data_array[:, -1]
 
@@ -96,8 +108,8 @@ def load_data(path):
 
 
 def build_train_validation_data(path):
-    nb_files = len([1 for x in list(os.scandir(path)) if x.is_file()])
-    cnt = 0
+    nb_files_w = len([1 for x in list(os.scandir(path + 'waldo/')) if x.is_file()])
+    nb_files_nw = len([1 for x in list(os.scandir(path + 'notwaldo/')) if x.is_file()])
 
     pathlib.Path(path + 'train').mkdir(exist_ok=True)
     pathlib.Path(path + 'train/waldo').mkdir(exist_ok=True)
@@ -106,20 +118,23 @@ def build_train_validation_data(path):
     pathlib.Path(path + 'validation/waldo').mkdir(exist_ok=True)
     pathlib.Path(path + 'validation/notwaldo').mkdir(exist_ok=True)
 
-    nb_test = nb_files / 3
+    nb_test_w = round(nb_files_w / 5)
+    nb_test_nw = round(nb_files_nw / 5)
 
+    cnt = 0
     for fname in os.listdir(path + 'waldo/'):
         shutil.move(path + 'waldo/' + fname, path + 'validation/waldo/' + fname)
         cnt += 1
-        if cnt >= nb_test:
+        if cnt >= nb_test_w:
             break
     for fname in os.listdir(path + 'waldo/'):
         shutil.move(path + 'waldo/' + fname, path + 'train/waldo/' + fname)
 
+    cnt = 0
     for fname in os.listdir(path + 'notwaldo/'):
         shutil.move(path + 'notwaldo/' + fname, path + 'validation/notwaldo/' + fname)
         cnt += 1
-        if cnt >= nb_test:
+        if cnt >= nb_test_nw:
             break
     for fname in os.listdir(path + 'notwaldo/'):
         shutil.move(path + 'notwaldo/' + fname, path + 'train/notwaldo/' + fname)
