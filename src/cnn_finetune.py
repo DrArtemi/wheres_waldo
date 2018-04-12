@@ -176,7 +176,7 @@ def train_finetuned_model():
     history = model.fit_generator(
         train_generator,
         steps_per_epoch=train_generator.samples // batch_size + 1,
-        epochs=10,
+        epochs=100,
         validation_data=validation_generator,
         validation_steps=validation_generator.samples // batch_size + 1,
         verbose=1)
