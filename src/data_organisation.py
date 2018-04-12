@@ -40,8 +40,8 @@ def organize_data(img_dir):
     nb_w, nb_nw = count_files(img_dir)
     cnt = 0
 
-    nb_test_w = nb_w / 5
-    nb_test_nw = nb_nw / 5
+    nb_test_w = nb_w / 10
+    nb_test_nw = nb_nw / 10
 
     for fname in os.listdir(WALDO_DIR + img_dir + '/waldo/'):
         shutil.move(WALDO_DIR + img_dir + '/waldo/' + fname,

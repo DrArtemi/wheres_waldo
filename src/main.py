@@ -1,7 +1,5 @@
-from knn import *
-from svm import *
-from cnn import *
-from utils import load_data
+from cnn_finetune import cnn_ft_algorithm
+import numpy as np
 import time
 import os
 
@@ -48,5 +46,5 @@ if __name__ == '__main__':
 
     # Convolution neural network
     print('CNN algorithm:')
-    cnn_algorithm()
-    # x_test, y_test = load_data(os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/128/' + 'test/')
+    # cnn_algorithm()
+    cnn_ft_algorithm()

@@ -59,7 +59,7 @@ def get_waldos_data(path):
 
 def data_add_noise(waldos, path):
     for idx, waldo in enumerate(waldos):
-        for i in range(40):
+        for i in range(10):
             noise = (0.4 * np.random.randn(*waldo.shape)) * 10
             img = waldo + noise
             cv2.imwrite(path + '/noisy_' + str(idx) + '_' + str(i) + '.jpg', img)
