@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/256/'
+DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/128/'
 BOTTLENECK_FEATURES_PATH = os.path.dirname(os.path.realpath(__file__)) + '/../bottleneck_features/'
 FT_WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../finetune_weights/'
 
@@ -70,20 +70,20 @@ def evaluate_CNN(model, history):
 
 
 def train_vgg_model():
-    model = VGG16(include_top=False, weights='imagenet')
+    model = VGG16(include_top=False, weights='imagenet', input_shape=(128, 128, 3))
     datagen = ImageDataGenerator(rescale=1. / 255)
     batch_size = 32  # Number of sample used simultaneously on a layer
 
     train_generator = datagen.flow_from_directory(
         DATA_DIR + 'train/train',
-        target_size=(224, 224),
+        target_size=(128, 128),
         batch_size=batch_size,
         class_mode=None,
         shuffle=False)
 
     validation_generator = datagen.flow_from_directory(
         DATA_DIR + 'train/validation',
-        target_size=(224, 224),
+        target_size=(128, 128),
         batch_size=batch_size,
         class_mode=None,
         shuffle=False)
@@ -152,10 +152,14 @@ def train_finetuned_model():
                   metrics=['accuracy'])
 
     train_datagen = ImageDataGenerator(
+        rotation_range=40,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
         shear_range=0.2,
         zoom_range=0.2,
+        horizontal_flip=True,
         rescale=1. / 255,
-        horizontal_flip=True)
+        fill_mode="nearest")
 
     val_datagen = ImageDataGenerator(rescale=1. / 255)
 
@@ -176,7 +180,7 @@ def train_finetuned_model():
     history = model.fit_generator(
         train_generator,
         steps_per_epoch=train_generator.samples // batch_size + 1,
-        epochs=100,
+        epochs=10,
         validation_data=validation_generator,
         validation_steps=validation_generator.samples // batch_size + 1,
         verbose=1)
@@ -184,9 +188,71 @@ def train_finetuned_model():
     return model, history
 
 
+def train_finetuned_model_2():
+    vgg16_model = VGG16(include_top=False, weights='imagenet', input_shape=(128, 128, 3))
+    batch_size = 32  # Number of sample used simultaneously on a layer
+
+    # vgg16_model.summary()
+
+    top_model = Sequential()
+    top_model.add(Flatten(input_shape=vgg16_model.output_shape[1:]))
+    top_model.add(Dense(256, activation='relu'))
+    # top_model.add(Dropout(0.5))
+    top_model.add(Dense(1, activation='sigmoid'))
+
+    model = Sequential()
+    for layer in vgg16_model.layers:
+        layer.trainable = False
+        model.add(layer)
+    model.add(top_model)
+
+    model.summary()
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer=optimizers.RMSprop(lr=2e-5),
+                  metrics=['accuracy'])
+
+    train_datagen = ImageDataGenerator(
+        rotation_range=40,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        rescale=1. / 255,
+        fill_mode="nearest")
+
+    val_datagen = ImageDataGenerator(rescale=1. / 255)
+
+    train_generator = train_datagen.flow_from_directory(
+        DATA_DIR + 'train/train',
+        target_size=(128, 128),
+        batch_size=batch_size,
+        class_mode='binary',
+        shuffle=True)
+
+    validation_generator = val_datagen.flow_from_directory(
+        DATA_DIR + 'train/validation',
+        target_size=(128, 128),
+        batch_size=batch_size,
+        class_mode='binary',
+        shuffle=True)
+
+    history = model.fit_generator(
+        train_generator,
+        steps_per_epoch=train_generator.samples // batch_size + 1,
+        epochs=30,
+        validation_data=validation_generator,
+        validation_steps=validation_generator.samples // batch_size + 1,
+        verbose=1)
+
+    return model, history
+
+
+
 def cnn_ft_algorithm():
     # TODO: Uncomment this if image folder is fcked up
-    # undo_train_validation_data(DATA_DIR + 'train/')
+    undo_train_validation_data(DATA_DIR + 'train/')
 
     # Build validation directory for training
     build_train_validation_data(DATA_DIR + 'train/')
@@ -198,9 +264,9 @@ def cnn_ft_algorithm():
     # train_fc_model()
 
     # Finetune vgg16 and fc model with previously trained weights
-    model, history = train_finetuned_model()
+    train_finetuned_model_2()
 
-    evaluate_CNN(model, history)
+    # evaluate_CNN(model, history)
 
     # Destroy validation directory for training
     undo_train_validation_data(DATA_DIR + 'train/')
