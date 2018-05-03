@@ -1,4 +1,4 @@
-from utils import *
+from utils import load_data, build_train_validation_data, undo_train_validation_data
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
@@ -9,7 +9,6 @@ import os
 
 DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/128/'
 WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../weights/'
-FT_WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../finetune_weights/'
 
 
 def plot_loss_accuracy(history):
@@ -33,38 +32,26 @@ def plot_loss_accuracy(history):
 
 def save_weights(model):
     model.save_weights(WEIGHTS_DIR + 'weights_' + time.strftime("%d-%m-%Y") + '_' + time.strftime('%H:%M') + '.h5')
-    model.save_weights(FT_WEIGHTS_DIR + 'weights.h5')
 
 
 def build_CNN():
-    learning_rate = 1e-3  # Learning rate
-
-    input_shape = (224, 224, 3)
-    kernel_size = 3  # CNN filter size
-    pool_size = 2  # Pool size
-    kernel_nb_1 = 32  # Number of filters
-    kernel_nb_2 = 64  # Number of filters
-    dropout = 0.5  # Probability of dropout
-    hidden_size = 64  # Neurons number
-    activation = 'relu'  # Activation function
-    f_activation = 'sigmoid'  # Final activation function
-    nb_classes = 1  # Number of classes -1
+    learning_rate = 1e-3
 
     # Build model
     model = Sequential()
-    model.add(Conv2D(kernel_nb_1, (kernel_size, kernel_size), input_shape=input_shape, activation=activation))
-    model.add(MaxPooling2D(pool_size=(pool_size, pool_size)))
+    model.add(Conv2D(32, (3, 3), input_shape=(128, 128, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(kernel_nb_1, (kernel_size, kernel_size), activation=activation))
-    model.add(MaxPooling2D(pool_size=(pool_size, pool_size)))
+    model.add(Conv2D(32, (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(kernel_nb_2, (kernel_size, kernel_size), activation=activation))
-    model.add(MaxPooling2D(pool_size=(pool_size, pool_size)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())  # Flatten image to a 1D vector
-    model.add(Dense(hidden_size, activation=activation))
-    model.add(Dropout(dropout))
-    model.add(Dense(nb_classes, activation=f_activation))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1, activation='sigmoid'))
 
     # Model summary
     model.summary()
@@ -81,10 +68,9 @@ def build_CNN():
 
 
 def train_CNN(model, nb_epochs):
-    x_train, y_train = load_data(DATA_DIR + 'train/')
+    x_train, y_train = load_data(DATA_DIR + 'train')
 
     x_train = x_train.astype('float64')
-    # x_train -= np.mean(x_train, axis=0)
     x_train /= 255
 
     batch_size = 32  # Number of sample used simultaneously on a layer
@@ -95,7 +81,7 @@ def train_CNN(model, nb_epochs):
                         epochs=nb_epochs,
                         verbose=1,
                         validation_split=val_split,
-                        shuffle=True)
+                        shuffle=False)
 
     save_weights(model)
 
@@ -104,6 +90,7 @@ def train_CNN(model, nb_epochs):
 
 def train_aug_CNN(model, nb_epochs):
     batch_size = 32  # Number of sample used simultaneously on a layer
+
     # Build validation directory for training
     build_train_validation_data(DATA_DIR + 'train/')
 
@@ -121,14 +108,14 @@ def train_aug_CNN(model, nb_epochs):
 
     train_generator = train_datagen.flow_from_directory(
         DATA_DIR + 'train/train',
-        target_size=(224, 224),
+        target_size=(128, 128),
         batch_size=batch_size,
         class_mode='binary',
         shuffle=True)
 
     validation_generator = val_datagen.flow_from_directory(
         DATA_DIR + 'train/validation',
-        target_size=(224, 224),
+        target_size=(128, 128),
         batch_size=batch_size,
         class_mode='binary',
         shuffle=True)
@@ -149,50 +136,29 @@ def train_aug_CNN(model, nb_epochs):
 
 
 def evaluate_CNN(model, history):
-    x_test, y_test = load_data(DATA_DIR + 'test/')
-    # x_test = x_test.astype('float64')
-    # x_test /= 255
-
     batch_size = 32  # Number of sample used simultaneously on a layer
 
     test_datagen = ImageDataGenerator(rescale=1. / 255)
 
     test_generator = test_datagen.flow_from_directory(
         DATA_DIR + 'test',
-        target_size=(224, 224),
+        target_size=(128, 128),
         batch_size=batch_size,
         class_mode='binary'
     )
 
-    predictions = model.predict_generator(test_generator)
+    results = model.evaluate_generator(test_generator)
 
-    # loss, accuracy = model.evaluate(x_test, y_test, batch_size=batch_size)
-    # print('Accuracy: ', accuracy)
-    # print('Loss: ', loss)
+    print('Loss: ' + str(results[0]))
+    print('Accuracy: ' + str(results[1]))
 
-    # predictions = model.predict(x_test, verbose=0)
-    # Print predictions vector
-    # for idx, pred in enumerate(predictions):
-    #     if y_test[idx] == 1:
-    #         print(round(pred[0], 2))
-    #         plt.imshow(x_test[idx])
-    #         plt.show()
-    npred = []
-    for pred in predictions:
-        print(round(pred[0], 2))
-        npred.append(round(pred[0]))
-    print(npred)
-    total_accuracy = get_total_accuracy(y_test, npred)
-    waldo_accuracy = get_waldo_accuracy(y_test, npred)
-    print('Total accuracy of: ' + str(total_accuracy) + '%.')
-    print('Waldo accuracy of: ' + str(waldo_accuracy) + '%.')
     plot_loss_accuracy(history)
 
 
 def cnn_algorithm():
-    #TODO: Uncomment this if image folder is fcked up
+    #TODO: Uncomment this if image folder architecture is not normal
     # undo_train_validation_data(DATA_DIR + 'train/')
     model = build_CNN()
-    model, history = train_aug_CNN(model, 10)
+    model, history = train_CNN(model, 100)
+    # model, history = train_aug_CNN(model, 100)
     evaluate_CNN(model, history)
-
