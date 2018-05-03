@@ -1,14 +1,12 @@
-from utils import load_data, build_train_validation_data, undo_train_validation_data
+from utils import load_data, build_train_validation_data, undo_train_validation_data, save_weights
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from keras import optimizers
 import matplotlib.pyplot as plt
-import time
 import os
 
 DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/128/'
-WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../weights/'
 
 
 def plot_loss_accuracy(history):
@@ -28,10 +26,6 @@ def plot_loss_accuracy(history):
     ax.grid(True)
 
     plt.savefig('loss_acc.png')
-
-
-def save_weights(model):
-    model.save_weights(WEIGHTS_DIR + 'weights_' + time.strftime("%d-%m-%Y") + '_' + time.strftime('%H:%M') + '.h5')
 
 
 def build_CNN():

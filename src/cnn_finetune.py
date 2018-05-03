@@ -107,6 +107,8 @@ def train_finetuned_model():
         validation_steps=validation_generator.samples // batch_size + 1,
         verbose=1)
 
+    save_weights(model)
+
     return model, history
 
 

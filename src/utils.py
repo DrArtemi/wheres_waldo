@@ -3,9 +3,11 @@ from sklearn.utils import shuffle
 import numpy as np
 import pathlib
 import shutil
+import time
 import os
 
 WALDO_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/'
+WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../weights/'
 
 
 def load_data(path):
@@ -130,3 +132,6 @@ def get_waldo_accuracy(label, predictions):
         if label[i] == 1 and label[i] == predictions[i]:
             cnt += 1
     return round(cnt / cnt_waldo * 100, 2)
+
+def save_weights(model):
+    model.save_weights(WEIGHTS_DIR + 'weights_' + time.strftime("%d-%m-%Y") + '_' + time.strftime('%H:%M') + '.h5')
