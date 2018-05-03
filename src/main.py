@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('agg')
 from knn import knn_algorithm, knn_cross_validation
 from svm import svm_algorithm, svm_cross_validation
 from cnn import cnn_algorithm

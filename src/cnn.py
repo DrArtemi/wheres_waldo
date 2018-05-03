@@ -14,20 +14,20 @@ WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../weights/'
 def plot_loss_accuracy(history):
     fig = plt.figure(figsize=(12, 6))
     ax = fig.add_subplot(1, 2, 1)
-    ax.plot(history.history["loss"], 'r-x', label="Train Loss")
-    ax.plot(history.history["val_loss"], 'b-x', label="Validation Loss")
+    ax.plot(history.history["loss"], 'r', label="Train Loss")
+    ax.plot(history.history["val_loss"], 'b', label="Validation Loss")
     ax.legend()
     ax.set_title('cross_entropy loss')
     ax.grid(True)
 
     ax = fig.add_subplot(1, 2, 2)
-    ax.plot(history.history["acc"], 'r-x', label="Train Accuracy")
-    ax.plot(history.history["val_acc"], 'b-x', label="Validation Accuracy")
+    ax.plot(history.history["acc"], 'r', label="Train Accuracy")
+    ax.plot(history.history["val_acc"], 'b', label="Validation Accuracy")
     ax.legend()
     ax.set_title('accuracy')
     ax.grid(True)
 
-    plt.show()
+    plt.savefig('loss_acc.png')
 
 
 def save_weights(model):
@@ -159,6 +159,6 @@ def cnn_algorithm():
     #TODO: Uncomment this if image folder architecture is not normal
     # undo_train_validation_data(DATA_DIR + 'train/')
     model = build_CNN()
-    model, history = train_CNN(model, 100)
-    # model, history = train_aug_CNN(model, 100)
+    model, history = train_CNN(model, 50)
+    # model, history = train_aug_CNN(model, 50)
     evaluate_CNN(model, history)

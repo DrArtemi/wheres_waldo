@@ -2,8 +2,8 @@ from keras import Sequential, optimizers
 from keras.applications.vgg16 import VGG16
 from keras.layers import Flatten, Dense
 from keras.preprocessing.image import ImageDataGenerator
-from utils import *
 import matplotlib.pyplot as plt
+from utils import *
 import os
 
 DATA_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../Hey-Waldo/128/'
@@ -14,20 +14,20 @@ FT_WEIGHTS_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../finetune_wei
 def plot_loss_accuracy(history):
     fig = plt.figure(figsize=(12, 6))
     ax = fig.add_subplot(1, 2, 1)
-    ax.plot(history.history["loss"], 'r-x', label="Train Loss")
-    ax.plot(history.history["val_loss"], 'b-x', label="Validation Loss")
+    ax.plot(history.history["loss"], 'r', label="Train Loss")
+    ax.plot(history.history["val_loss"], 'b', label="Validation Loss")
     ax.legend()
     ax.set_title('cross_entropy loss')
     ax.grid(True)
 
     ax = fig.add_subplot(1, 2, 2)
-    ax.plot(history.history["acc"], 'r-x', label="Train Accuracy")
-    ax.plot(history.history["val_acc"], 'b-x', label="Validation Accuracy")
+    ax.plot(history.history["acc"], 'r', label="Train Accuracy")
+    ax.plot(history.history["val_acc"], 'b', label="Validation Accuracy")
     ax.legend()
     ax.set_title('accuracy')
     ax.grid(True)
 
-    plt.show()
+    plt.savefig('loss_acc_ft.png')
 
 
 def evaluate_CNN(model, history):
